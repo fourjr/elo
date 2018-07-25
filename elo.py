@@ -190,7 +190,7 @@ class Elo(object):
         # http://www.chess-mind.com/en/elo-system
         diff = float(other_rating) - float(rating)
         f_factor = 2 * self.beta  # rating disparity
-        return min(max(1. / (1 + 10 ** (diff / f_factor)), 10), 50)
+        return 1. / (1 + 10 ** (diff / f_factor))
 
     def adjust(self, rating, series):
         """Calculates the adjustment value."""
@@ -201,7 +201,7 @@ class Elo(object):
         """Calculates new ratings by the game result series."""
         rating = self.ensure_rating(rating)
         k = self.k_factor(rating) if callable(self.k_factor) else self.k_factor
-        new_rating = float(rating) + k * self.adjust(rating, series)
+        new_rating = float(rating) + min(max(k * self.adjust(rating, series), 10), 50)
         if hasattr(rating, 'rated'):
             new_rating = rating.rated(new_rating)
         return new_rating
